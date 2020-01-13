@@ -6,20 +6,36 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.e.absenjti1.list.List_Activity;
+import com.e.absenjti1.list.attendance;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QuerySnapshot;
+
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.TimeZone;
 
 public class MainActivity extends AppCompatActivity {
 
     private boolean doubleBackPressed;
 
+    private FirebaseFirestore db = FirebaseFirestore.getInstance();
+    private CollectionReference ListRef = db.collection("Employee_List");
     private Handler handler = new Handler();
 
     private final Runnable runnable = new Runnable() {
@@ -36,7 +52,7 @@ public class MainActivity extends AppCompatActivity {
 
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -46,7 +62,47 @@ public class MainActivity extends AppCompatActivity {
         buttonSignIn = findViewById(R.id.btn_sign_in);
 
 
+        buttonVerify.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                ListRef.whereEqualTo("Id", editTextId).get()
+                        .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                            @Override
+                            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                if (task.isSuccessful()) {
+                                    for (DocumentSnapshot snapshot : task.getResult()) {
+                                        if (snapshot.getString("id").equals(editTextId)) {
+                                            TextViewName.setText(snapshot.get("Name").toString());
+                                        }
+                                    }
+                                }
+                            }
+                        });
 
+            }
+        });
+
+        buttonSignIn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String Id = editTextId.getText().toString();
+                String Name = TextViewName.getText().toString();
+                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ssz");
+                dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
+                String Location = "Office";
+
+                if (Id.trim().isEmpty() || Name.trim().isEmpty()) {
+                    Toast.makeText(MainActivity.this, "Please fill in the required information", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                upload(Id, Name, dateFormat, Location);
+            }
+        });
+    }
+
+    public void upload(final String Id, final String Name, final DateFormat dateFormat, final String Location) {
+        CollectionReference reference = FirebaseFirestore.getInstance().collection("Employee_Attendance");
+        reference.add(new attendance(Id, Name, dateFormat, Location));
     }
 
     @Override
@@ -58,7 +114,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        switch (item.getItemId()){
+        switch (item.getItemId()) {
             case R.id.menu_goto_detail:
                 Intent intent = new Intent(MainActivity.this, List_Activity.class);
                 startActivity(intent);
@@ -72,7 +128,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        if (doubleBackPressed){
+        if (doubleBackPressed) {
             super.onBackPressed();
             return;
         }

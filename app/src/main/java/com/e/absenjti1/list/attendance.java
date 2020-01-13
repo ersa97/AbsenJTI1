@@ -2,6 +2,8 @@ package com.e.absenjti1.list;
 
 import com.google.firebase.Timestamp;
 
+import java.text.DateFormat;
+
 public class attendance {
 
     String Id;
@@ -9,13 +11,14 @@ public class attendance {
     String Location;
     Timestamp Date;
 
-    public String getLocation(){
+    public String getLocation() {
         return Location;
     }
 
-    public void setLocation(String location){
+    public void setLocation(String location) {
         Location = location;
     }
+
     public String getId() {
         return Id;
     }
@@ -48,10 +51,9 @@ public class attendance {
         Location = location;
     }
 
-    public attendance(){
+    public attendance(String id, String name, DateFormat dateFormat, String location) {
 
     }
-
 
 
 }

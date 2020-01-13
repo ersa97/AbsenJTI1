@@ -13,11 +13,6 @@ import com.e.absenjti1.R;
 import com.firebase.ui.firestore.FirestoreRecyclerAdapter;
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
 
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Locale;
-
 
 public class AttendanceAdapter extends FirestoreRecyclerAdapter<attendance, AttendanceAdapter.AttendanceHolder> {
 
@@ -41,7 +36,7 @@ public class AttendanceAdapter extends FirestoreRecyclerAdapter<attendance, Atte
         return new AttendanceHolder(view);
     }
 
-    class AttendanceHolder extends RecyclerView.ViewHolder{
+    class AttendanceHolder extends RecyclerView.ViewHolder {
 
         TextView textViewid;
         TextView textViewname;

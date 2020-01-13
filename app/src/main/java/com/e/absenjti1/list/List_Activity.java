@@ -35,11 +35,11 @@ public class List_Activity extends AppCompatActivity {
 
     }
 
-    private void SetUpRecyclerView(){
-        Query query = activityRef.orderBy("Name",Query.Direction.ASCENDING);
+    private void SetUpRecyclerView() {
+        Query query = activityRef.orderBy("Name", Query.Direction.ASCENDING);
 
         FirestoreRecyclerOptions<attendance> recyclerOptions = new FirestoreRecyclerOptions.Builder<attendance>()
-                .setQuery(query,attendance.class)
+                .setQuery(query, attendance.class)
                 .build();
 
         adapter = new AttendanceAdapter(recyclerOptions);
