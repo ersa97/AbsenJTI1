@@ -18,9 +18,12 @@ import android.widget.Toast;
 import com.e.absenjti1.list.List_Activity;
 import com.e.absenjti1.list.attendance;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
@@ -28,6 +31,9 @@ import com.google.firebase.firestore.QuerySnapshot;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.TimeZone;
 
 public class MainActivity extends AppCompatActivity {
@@ -35,7 +41,6 @@ public class MainActivity extends AppCompatActivity {
     private boolean doubleBackPressed;
 
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
-    private CollectionReference ListRef = db.collection("Employee_List");
     private Handler handler = new Handler();
 
     private final Runnable runnable = new Runnable() {
@@ -49,6 +54,7 @@ public class MainActivity extends AppCompatActivity {
     TextView TextViewName;
     Button buttonVerify;
     Button buttonSignIn;
+
 
 
     @Override
@@ -65,15 +71,14 @@ public class MainActivity extends AppCompatActivity {
         buttonVerify.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                ListRef.whereEqualTo("Id", editTextId).get()
+                final String id = editTextId.getText().toString();
+                db.collection("Employee_List").whereEqualTo("Id", id).get()
                         .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                             @Override
                             public void onComplete(@NonNull Task<QuerySnapshot> task) {
                                 if (task.isSuccessful()) {
                                     for (DocumentSnapshot snapshot : task.getResult()) {
-                                        if (snapshot.getString("id").equals(editTextId)) {
                                             TextViewName.setText(snapshot.get("Name").toString());
-                                        }
                                     }
                                 }
                             }
@@ -95,14 +100,22 @@ public class MainActivity extends AppCompatActivity {
                     Toast.makeText(MainActivity.this, "Please fill in the required information", Toast.LENGTH_SHORT).show();
                     return;
                 }
-                upload(Id, Name, dateFormat, Location);
+                Map<String, Object> data = new HashMap<>();
+                data.put("Id", Id);
+                data.put("Name", Name);
+                data.put("Date", new Timestamp(new Date()));
+                data.put("Location", Location);
+
+                db.collection("Employee_Attendance")
+                        .add(data)
+                        .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                            @Override
+                            public void onSuccess(DocumentReference documentReference) {
+                                Toast.makeText(MainActivity.this, "Attendance Recorded", Toast.LENGTH_SHORT).show();
+                            }
+                        });
             }
         });
-    }
-
-    public void upload(final String Id, final String Name, final DateFormat dateFormat, final String Location) {
-        CollectionReference reference = FirebaseFirestore.getInstance().collection("Employee_Attendance");
-        reference.add(new attendance(Id, Name, dateFormat, Location));
     }
 
     @Override

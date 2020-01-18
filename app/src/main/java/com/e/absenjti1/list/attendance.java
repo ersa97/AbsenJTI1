@@ -55,5 +55,9 @@ public class attendance {
 
     }
 
+    public attendance(){
+
+    }
+
 
 }
